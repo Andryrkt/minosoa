@@ -2,14 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\SuppliersRepository;
+use App\Repository\CategoryTwoRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: SuppliersRepository::class)]
-class Suppliers
+#[ORM\Entity(repositoryClass: CategoryTwoRepository::class)]
+class CategoryTwo
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -20,7 +20,7 @@ class Suppliers
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $ContactInfo = null;
+    private ?string $description = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -28,15 +28,18 @@ class Suppliers
     #[ORM\Column]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    #[ORM\ManyToOne(inversedBy: 'categoryTwos')]
+    private ?CategoryOne $categoryOne = null;
+
     /**
-     * @var Collection<int, Product>
+     * @var Collection<int, CategoryThree>
      */
-    #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'supplierId')]
-    private Collection $products;
+    #[ORM\ManyToMany(targetEntity: CategoryThree::class, mappedBy: 'categoryTwo')]
+    private Collection $categoryThrees;
 
     public function __construct()
     {
-        $this->products = new ArrayCollection();
+        $this->categoryThrees = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -56,14 +59,14 @@ class Suppliers
         return $this;
     }
 
-    public function getContactInfo(): ?string
+    public function getDescription(): ?string
     {
-        return $this->ContactInfo;
+        return $this->description;
     }
 
-    public function setContactInfo(?string $ContactInfo): static
+    public function setDescription(?string $description): static
     {
-        $this->ContactInfo = $ContactInfo;
+        $this->description = $description;
 
         return $this;
     }
@@ -92,28 +95,40 @@ class Suppliers
         return $this;
     }
 
-    /**
-     * @return Collection<int, Product>
-     */
-    public function getProducts(): Collection
+    public function getCategoryOne(): ?CategoryOne
     {
-        return $this->products;
+        return $this->categoryOne;
     }
 
-    public function addProduct(Product $product): static
+    public function setCategoryOne(?CategoryOne $categoryOne): static
     {
-        if (!$this->products->contains($product)) {
-            $this->products->add($product);
-            $product->addSupplierId($this);
+        $this->categoryOne = $categoryOne;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CategoryThree>
+     */
+    public function getCategoryThrees(): Collection
+    {
+        return $this->categoryThrees;
+    }
+
+    public function addCategoryThree(CategoryThree $categoryThree): static
+    {
+        if (!$this->categoryThrees->contains($categoryThree)) {
+            $this->categoryThrees->add($categoryThree);
+            $categoryThree->addCategoryTwo($this);
         }
 
         return $this;
     }
 
-    public function removeProduct(Product $product): static
+    public function removeCategoryThree(CategoryThree $categoryThree): static
     {
-        if ($this->products->removeElement($product)) {
-            $product->removeSupplierId($this);
+        if ($this->categoryThrees->removeElement($categoryThree)) {
+            $categoryThree->removeCategoryTwo($this);
         }
 
         return $this;

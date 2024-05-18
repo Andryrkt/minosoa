@@ -25,6 +25,12 @@ class OrderItems
     #[ORM\Column]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    #[ORM\ManyToOne(inversedBy: 'orderItems')]
+    private ?Orders $orderId = null;
+
+    #[ORM\ManyToOne(inversedBy: 'orderItems')]
+    private ?Product $product = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -74,6 +80,30 @@ class OrderItems
     public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function getOrderId(): ?Orders
+    {
+        return $this->orderId;
+    }
+
+    public function setOrderId(?Orders $orderId): static
+    {
+        $this->orderId = $orderId;
+
+        return $this;
+    }
+
+    public function getProduct(): ?Product
+    {
+        return $this->product;
+    }
+
+    public function setProduct(?Product $product): static
+    {
+        $this->product = $product;
 
         return $this;
     }

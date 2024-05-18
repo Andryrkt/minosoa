@@ -2,13 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\UnitsRepository;
+use App\Repository\CategoryThreeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: UnitsRepository::class)]
-class Units
+#[ORM\Entity(repositoryClass: CategoryThreeRepository::class)]
+class CategoryThree
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -18,8 +19,8 @@ class Units
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $abbreviation = null;
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -28,14 +29,14 @@ class Units
     private ?\DateTimeImmutable $updatedAt = null;
 
     /**
-     * @var Collection<int, Product>
+     * @var Collection<int, CategoryTwo>
      */
-    #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'unitId')]
-    private Collection $products;
+    #[ORM\ManyToMany(targetEntity: CategoryTwo::class, inversedBy: 'categoryThrees')]
+    private Collection $categoryTwo;
 
     public function __construct()
     {
-        $this->products = new ArrayCollection();
+        $this->categoryTwo = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -55,14 +56,14 @@ class Units
         return $this;
     }
 
-    public function getAbbreviation(): ?string
+    public function getDescription(): ?string
     {
-        return $this->abbreviation;
+        return $this->description;
     }
 
-    public function setAbbreviation(?string $abbreviation): static
+    public function setDescription(?string $description): static
     {
-        $this->abbreviation = $abbreviation;
+        $this->description = $description;
 
         return $this;
     }
@@ -92,28 +93,25 @@ class Units
     }
 
     /**
-     * @return Collection<int, Product>
+     * @return Collection<int, CategoryTwo>
      */
-    public function getProducts(): Collection
+    public function getCategoryTwo(): Collection
     {
-        return $this->products;
+        return $this->categoryTwo;
     }
 
-    public function addProduct(Product $product): static
+    public function addCategoryTwo(CategoryTwo $categoryTwo): static
     {
-        if (!$this->products->contains($product)) {
-            $this->products->add($product);
-            $product->addUnitId($this);
+        if (!$this->categoryTwo->contains($categoryTwo)) {
+            $this->categoryTwo->add($categoryTwo);
         }
 
         return $this;
     }
 
-    public function removeProduct(Product $product): static
+    public function removeCategoryTwo(CategoryTwo $categoryTwo): static
     {
-        if ($this->products->removeElement($product)) {
-            $product->removeUnitId($this);
-        }
+        $this->categoryTwo->removeElement($categoryTwo);
 
         return $this;
     }

@@ -2,13 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\UnitsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\CategoryOneRepository;
 
-#[ORM\Entity(repositoryClass: UnitsRepository::class)]
-class Units
+#[ORM\Entity(repositoryClass: CategoryOneRepository::class)]
+class CategoryOne
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -18,8 +19,8 @@ class Units
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $abbreviation = null;
+    #[ORM\Column(type: Types::TEXT,nullable: true)]
+    private ?string $description = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -28,13 +29,20 @@ class Units
     private ?\DateTimeImmutable $updatedAt = null;
 
     /**
+     * @var Collection<int, CategoryTwo>
+     */
+    #[ORM\OneToMany(targetEntity: CategoryTwo::class, mappedBy: 'categoryOne')]
+    private Collection $categoryTwos;
+
+    /**
      * @var Collection<int, Product>
      */
-    #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'unitId')]
+    #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'CategoryOneId')]
     private Collection $products;
 
     public function __construct()
     {
+        $this->categoryTwos = new ArrayCollection();
         $this->products = new ArrayCollection();
     }
 
@@ -55,14 +63,14 @@ class Units
         return $this;
     }
 
-    public function getAbbreviation(): ?string
+    public function getDescription(): ?string
     {
-        return $this->abbreviation;
+        return $this->description;
     }
 
-    public function setAbbreviation(?string $abbreviation): static
+    public function setDescription(?string $description): static
     {
-        $this->abbreviation = $abbreviation;
+        $this->description = $description;
 
         return $this;
     }
@@ -92,6 +100,36 @@ class Units
     }
 
     /**
+     * @return Collection<int, CategoryTwo>
+     */
+    public function getCategoryTwos(): Collection
+    {
+        return $this->categoryTwos;
+    }
+
+    public function addCategoryTwo(CategoryTwo $categoryTwo): static
+    {
+        if (!$this->categoryTwos->contains($categoryTwo)) {
+            $this->categoryTwos->add($categoryTwo);
+            $categoryTwo->setCategoryOne($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCategoryTwo(CategoryTwo $categoryTwo): static
+    {
+        if ($this->categoryTwos->removeElement($categoryTwo)) {
+            // set the owning side to null (unless already changed)
+            if ($categoryTwo->getCategoryOne() === $this) {
+                $categoryTwo->setCategoryOne(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * @return Collection<int, Product>
      */
     public function getProducts(): Collection
@@ -103,7 +141,7 @@ class Units
     {
         if (!$this->products->contains($product)) {
             $this->products->add($product);
-            $product->addUnitId($this);
+            $product->addCategoryOneId($this);
         }
 
         return $this;
@@ -112,7 +150,7 @@ class Units
     public function removeProduct(Product $product): static
     {
         if ($this->products->removeElement($product)) {
-            $product->removeUnitId($this);
+            $product->removeCategoryOneId($this);
         }
 
         return $this;
